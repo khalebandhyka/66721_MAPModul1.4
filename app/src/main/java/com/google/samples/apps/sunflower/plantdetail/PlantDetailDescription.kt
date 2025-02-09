@@ -1,5 +1,7 @@
 package com.google.samples.apps.sunflower.plantdetail
 
+import android.text.method.LinkMovementMethod
+import android.widget.TextView
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -9,6 +11,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -17,6 +20,8 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.text.HtmlCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import com.google.samples.apps.sunflower.R
@@ -24,16 +29,39 @@ import com.google.samples.apps.sunflower.data.Plant
 import com.google.samples.apps.sunflower.viewmodels.PlantDetailViewModel
 
 @Composable
-fun PlantDetailDescription(plantDetailViewModel: PlantDetailViewModel) {
-    // Observe LiveData correctly
-    val plantState = plantDetailViewModel.plant.observeAsState()
-    val plant = plantState.value
+private fun PlantDescription(description: String) {
+    // Remembers the HTML formatted description. Re-executes on a new description
+    val htmlDescription = remember(description) {
+        HtmlCompat.fromHtml(description, HtmlCompat.FROM_HTML_MODE_COMPACT)
+    }
 
-    // If plant is not null, display content
+    // Displays the TextView on the screen and updates with the HTML description when inflated
+    // Updates to htmlDescription will make AndroidView recompose and update the text
+    AndroidView(
+        factory = { context ->
+            TextView(context).apply {
+                movementMethod = LinkMovementMethod.getInstance()
+            }
+        },
+        update = {
+            it.text = htmlDescription
+        }
+    )
+}
+
+@Composable
+fun PlantDetailDescription(viewModel: PlantDetailViewModel) {
+    val plant = viewModel.plant.observeAsState().value
+
     plant?.let {
-        PlantDetailContent(it)
+        Column(Modifier.padding(dimensionResource(R.dimen.margin_normal))) {
+            PlantName(it.name)
+            PlantWatering(it.wateringInterval)
+            PlantDescription(it.description)
+        }
     }
 }
+
 
 @Composable
 fun PlantDetailContent(plant: Plant) {
@@ -44,6 +72,7 @@ fun PlantDetailContent(plant: Plant) {
         }
     }
 }
+
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun PlantWatering(wateringInterval: Int) {
@@ -87,10 +116,9 @@ private fun PlantName(name: String) {
 
 @Preview
 @Composable
-private fun PlantDetailContentPreview() {
-    val plant = Plant("id", "Apple", "description", 3, 30, "")
+private fun PlantDescriptionPreview() {
     MaterialTheme {
-        PlantDetailContent(plant)
+        PlantDescription("HTML<br><br>description")
     }
 }
 
