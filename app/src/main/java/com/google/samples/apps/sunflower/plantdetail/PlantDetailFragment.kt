@@ -30,6 +30,7 @@
     import androidx.fragment.app.viewModels
     import androidx.navigation.findNavController
     import androidx.navigation.fragment.navArgs
+    import androidx.compose.ui.platform.ViewCompositionStrategy
     import com.google.android.material.floatingactionbutton.FloatingActionButton
     import com.google.android.material.snackbar.Snackbar
     import com.google.samples.apps.sunflower.R
@@ -114,10 +115,14 @@
                         else -> false
                     }
                 }
-                composeView.setContent {
-                    // You're in Compose world!
-                    MaterialTheme {
-                        PlantDetailDescription(plantDetailViewModel)
+                composeView.apply {
+                    setViewCompositionStrategy(
+                        ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
+                    )
+                    setContent {
+                        MaterialTheme {
+                            PlantDetailDescription(plantDetailViewModel)
+                        }
                     }
                 }
                 }
