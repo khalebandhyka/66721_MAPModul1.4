@@ -21,6 +21,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.material3.MaterialTheme
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ShareCompat
 import androidx.core.widget.NestedScrollView
@@ -43,6 +44,8 @@ import com.google.samples.apps.sunflower.viewmodels.PlantDetailViewModel
 class PlantDetailFragment : Fragment() {
 
     private val args: PlantDetailFragmentArgs by navArgs()
+    private var _binding: FragmentPlantDetailBinding? = null
+    private val binding get() = _binding!!
 
     private val plantDetailViewModel: PlantDetailViewModel by viewModels {
         InjectorUtils.providePlantDetailViewModelFactory(requireActivity(), args.plantId)
@@ -52,7 +55,7 @@ class PlantDetailFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
+    ): View? {
         val binding = DataBindingUtil.inflate<FragmentPlantDetailBinding>(
             inflater,
             R.layout.fragment_plant_detail,
@@ -64,13 +67,14 @@ class PlantDetailFragment : Fragment() {
             callback = object : Callback {
                 override fun add(plant: Plant?) {
                     plant?.let {
-                        hideAppBarFab(fab)
+                        hideAppBarFab(binding.fab) // Now 'fab' is properly referenced
                         plantDetailViewModel.addPlantToGarden()
-                        Snackbar.make(root, R.string.added_plant_to_garden, Snackbar.LENGTH_LONG)
+                        Snackbar.make(binding.root, R.string.added_plant_to_garden, Snackbar.LENGTH_LONG)
                             .show()
                     }
                 }
             }
+
 
             var isToolbarShown = false
 
@@ -109,7 +113,13 @@ class PlantDetailFragment : Fragment() {
                     else -> false
                 }
             }
-        }
+            composeView.setContent {
+                // You're in Compose world!
+                MaterialTheme {
+                    PlantDetailDescription()
+                }
+            }
+            }
         setHasOptionsMenu(true)
 
         return binding.root
