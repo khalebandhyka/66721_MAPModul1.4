@@ -39,6 +39,7 @@
     import com.google.samples.apps.sunflower.utilities.InjectorUtils
     import com.google.samples.apps.sunflower.viewmodels.PlantDetailViewModel
     import com.google.samples.apps.sunflower.plantdetail.PlantDetailDescription
+    import com.google.samples.apps.sunflower.theme.SunflowerTheme
 
     /**
      * A fragment representing a single Plant detail screen.
@@ -120,7 +121,7 @@
                         ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
                     )
                     setContent {
-                        MaterialTheme {
+                        SunflowerTheme {
                             PlantDetailDescription(plantDetailViewModel)
                         }
                     }
